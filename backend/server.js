@@ -1,28 +1,74 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config();
 
 const Post = require("./models/Post");
 const User = require("./models/User");
 
 const app = express();
 
+// ==================== MIDDLEWARE ====================
+
 app.use(cors());
 app.use(express.json());
 
-// MongoDB
-mongoose
-  .connect("mongodb://127.0.0.1:27017/mini_social_media")
-  .then(() => {
-    console.log("MongoDB connected successfully!");
-  })
-  .catch((error) => {
-    console.log("MongoDB connection error:", error);
-  });
+// ==================== MONGODB CONNECTION ====================
 
-// Test
+let isConnecting = false;
+
+const connectDB = async () => {
+  try {
+    // Already connected
+    if (mongoose.connection.readyState === 1) {
+      return;
+    }
+
+    // Connection already in progress
+    if (isConnecting) {
+      return;
+    }
+
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is missing in .env file");
+    }
+
+    isConnecting = true;
+
+    await mongoose.connect(process.env.MONGO_URI);
+
+    isConnecting = false;
+
+    console.log("MongoDB connected successfully!");
+  } catch (error) {
+    isConnecting = false;
+
+    console.log("MongoDB connection error:", error.message);
+
+    throw error;
+  }
+};
+
+// ==================== DATABASE MIDDLEWARE ====================
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({
+      message: "Database connection failed",
+      error: error.message,
+    });
+  }
+});
+
+// ==================== TEST ====================
+
 app.get("/", (req, res) => {
-  res.send("Mini Social Media Backend is running!");
+  res.json({
+    message: "Mini Social Media Backend is running!",
+  });
 });
 
 // ==================== REGISTER ====================
@@ -30,6 +76,12 @@ app.get("/", (req, res) => {
 app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Please fill all fields",
+      });
+    }
 
     const existingUser = await User.findOne({ email });
 
@@ -52,14 +104,17 @@ app.post("/api/register", async (req, res) => {
       user: savedUser,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Registration error:", error.message);
 
     res.status(500).json({
       message: "Registration failed",
+      error: error.message,
     });
   }
 });
-// Login User
+
+// ==================== LOGIN ====================
+
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -83,13 +138,15 @@ app.post("/api/login", async (req, res) => {
       user: user,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Login error:", error.message);
 
     res.status(500).json({
       message: "Login failed",
+      error: error.message,
     });
   }
 });
+
 // ==================== CREATE POST ====================
 
 app.post("/api/posts", async (req, res) => {
@@ -103,7 +160,7 @@ app.post("/api/posts", async (req, res) => {
 
     res.status(201).json(savedPost);
   } catch (error) {
-    console.log("Create post error:", error);
+    console.log("Create post error:", error.message);
 
     res.status(500).json({
       message: "Failed to create post",
@@ -122,10 +179,11 @@ app.get("/api/posts", async (req, res) => {
 
     res.json(posts);
   } catch (error) {
-    console.log(error);
+    console.log("Get posts error:", error.message);
 
     res.status(500).json({
       message: "Failed to fetch posts",
+      error: error.message,
     });
   }
 });
@@ -140,10 +198,11 @@ app.delete("/api/posts/:id", async (req, res) => {
       message: "Post deleted successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.log("Delete post error:", error.message);
 
     res.status(500).json({
       message: "Failed to delete post",
+      error: error.message,
     });
   }
 });
@@ -160,10 +219,11 @@ app.put("/api/posts/:id/like", async (req, res) => {
 
     res.json(post);
   } catch (error) {
-    console.log(error);
+    console.log("Like error:", error.message);
 
     res.status(500).json({
       message: "Failed to like post",
+      error: error.message,
     });
   }
 });
@@ -174,16 +234,21 @@ app.put("/api/posts/:id/comment", async (req, res) => {
   try {
     const post = await Post.findByIdAndUpdate(
       req.params.id,
-      { $push: { comments: req.body.comment } },
+      {
+        $push: {
+          comments: req.body.comment,
+        },
+      },
       { new: true }
     );
 
     res.json(post);
   } catch (error) {
-    console.log(error);
+    console.log("Add comment error:", error.message);
 
     res.status(500).json({
       message: "Failed to add comment",
+      error: error.message,
     });
   }
 });
@@ -204,15 +269,16 @@ app.put("/api/posts/:id/comment/delete", async (req, res) => {
 
     res.json(post);
   } catch (error) {
-    console.log(error);
+    console.log("Delete comment error:", error.message);
 
     res.status(500).json({
       message: "Failed to delete comment",
+      error: error.message,
     });
   }
 });
 
-// // ==================== USER STATS ====================
+// ==================== USER STATS ====================
 
 app.get("/api/users/:id/posts", async (req, res) => {
   try {
@@ -228,14 +294,17 @@ app.get("/api/users/:id/posts", async (req, res) => {
       following: user ? user.following.length : 0,
     });
   } catch (error) {
-    console.log("Error fetching user stats:", error);
+    console.log("User stats error:", error.message);
 
     res.status(500).json({
       message: "Failed to fetch user stats",
+      error: error.message,
     });
   }
 });
-// Update User Profile
+
+// ==================== UPDATE USER PROFILE ====================
+
 app.put("/api/users/:id", async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
@@ -249,15 +318,17 @@ app.put("/api/users/:id", async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    console.log(error);
+    console.log("Update profile error:", error.message);
 
     res.status(500).json({
       message: "Failed to update profile",
+      error: error.message,
     });
   }
 });
- 
-// Follow User
+
+// ==================== FOLLOW USER ====================
+
 app.put("/api/users/:id/follow", async (req, res) => {
   try {
     const currentUserId = req.body.currentUserId;
@@ -298,15 +369,17 @@ app.put("/api/users/:id/follow", async (req, res) => {
       message: "User followed successfully",
     });
   } catch (error) {
-    console.log("Follow error:", error);
+    console.log("Follow error:", error.message);
 
     res.status(500).json({
       message: "Failed to follow user",
+      error: error.message,
     });
   }
 });
-// Unfollow User
-// Unfollow User
+
+// ==================== UNFOLLOW USER ====================
+
 app.put("/api/users/:id/unfollow", async (req, res) => {
   try {
     const currentUserId = req.body.currentUserId;
@@ -336,14 +409,17 @@ app.put("/api/users/:id/unfollow", async (req, res) => {
       message: "User unfollowed successfully",
     });
   } catch (error) {
-    console.log("Unfollow error:", error);
+    console.log("Unfollow error:", error.message);
 
     res.status(500).json({
       message: "Failed to unfollow user",
+      error: error.message,
     });
   }
 });
-// Get All Users
+
+// ==================== GET ALL USERS ====================
+
 app.get("/api/users", async (req, res) => {
   try {
     const users = await User.find().select(
@@ -352,23 +428,23 @@ app.get("/api/users", async (req, res) => {
 
     res.json(users);
   } catch (error) {
-    console.log("Error fetching users:", error);
+    console.log("Get users error:", error.message);
 
     res.status(500).json({
       message: "Failed to fetch users",
+      error: error.message,
     });
   }
 });
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+
 // ==================== GET FOLLOWERS ====================
 
 app.get("/api/users/:id/followers", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
-      .populate("followers", "name email");
+    const user = await User.findById(req.params.id).populate(
+      "followers",
+      "name email"
+    );
 
     if (!user) {
       return res.status(404).json({
@@ -378,10 +454,25 @@ app.get("/api/users/:id/followers", async (req, res) => {
 
     res.json(user.followers);
   } catch (error) {
-    console.log("Error fetching followers:", error);
+    console.log("Get followers error:", error.message);
 
     res.status(500).json({
       message: "Failed to fetch followers",
+      error: error.message,
     });
   }
 });
+
+// ==================== LOCAL SERVER ====================
+
+const PORT = process.env.PORT || 5000;
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+// ==================== VERCEL EXPORT ====================
+
+module.exports = app;
