@@ -12,7 +12,7 @@ function Login() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/login",
+        "https://mini-social-media-4xtk.vercel.app/api/login",
         {
           method: "POST",
           headers: {
@@ -30,10 +30,7 @@ function Login() {
       if (response.ok) {
         alert("Login successful!");
 
-        localStorage.setItem(
-          "isLoggedIn",
-          "true"
-        );
+        localStorage.setItem("isLoggedIn", "true");
 
         localStorage.setItem(
           "user",
@@ -65,9 +62,7 @@ function Login() {
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
 
@@ -75,9 +70,7 @@ function Login() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
 

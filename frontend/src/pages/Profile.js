@@ -22,7 +22,7 @@ function Profile() {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${user._id}/posts`
+          `https://mini-social-media-4xtk.vercel.app/api/users/${user._id}/posts`
         );
 
         const data = await response.json();
@@ -46,7 +46,7 @@ function Profile() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/users/${user._id}`,
+        `https://mini-social-media-4xtk.vercel.app/api/users/${user._id}`,
         {
           method: "PUT",
           headers: {

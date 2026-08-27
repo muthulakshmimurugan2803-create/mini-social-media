@@ -21,7 +21,7 @@ function Dashboard() {
     const fetchUserStats = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${currentUser._id}/posts`
+          `https://mini-social-media-4xtk.vercel.app/api/users/${currentUser._id}/posts`
         );
 
         const data = await response.json();
@@ -30,7 +30,10 @@ function Dashboard() {
         setFollowerCount(data.followers || 0);
         setFollowingCount(data.following || 0);
       } catch (error) {
-        console.log("Error fetching dashboard stats:", error);
+        console.log(
+          "Error fetching dashboard stats:",
+          error
+        );
       }
     };
 
@@ -50,56 +53,57 @@ function Dashboard() {
           <h2>{user ? user.name : "User"}</h2>
 
           <p>{user ? user.email : ""}</p>
+
           <Link to="/profile">
-  <button>
-    👤 View Profile
-  </button>
-</Link>
+            <button>
+              👤 View Profile
+            </button>
+          </Link>
         </div>
 
         <div className="dashboard-stats">
 
           <Link
-  to="/home"
-  style={{
-    textDecoration: "none",
-    color: "inherit",
-  }}
->
-  <div className="stat-card">
-    <span className="stat-icon">📝</span>
-    <strong>{postCount}</strong>
-    <p>Posts</p>
-  </div>
-</Link>
+            to="/home"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <div className="stat-card">
+              <span className="stat-icon">📝</span>
+              <strong>{postCount}</strong>
+              <p>Posts</p>
+            </div>
+          </Link>
 
           <Link
-  to="/followers"
-  style={{
-    textDecoration: "none",
-    color: "inherit",
-  }}
->
-  <div className="stat-card">
-    <span className="stat-icon">👥</span>
-    <strong>{followerCount}</strong>
-    <p>Followers</p>
-  </div>
-</Link>
+            to="/followers"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <div className="stat-card">
+              <span className="stat-icon">👥</span>
+              <strong>{followerCount}</strong>
+              <p>Followers</p>
+            </div>
+          </Link>
 
           <Link
-  to="/following"
-  style={{
-    textDecoration: "none",
-    color: "inherit",
-  }}
->
-  <div className="stat-card">
-    <span className="stat-icon">🤝</span>
-    <strong>{followingCount}</strong>
-    <p>Following</p>
-  </div>
-</Link>
+            to="/following"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <div className="stat-card">
+              <span className="stat-icon">🤝</span>
+              <strong>{followingCount}</strong>
+              <p>Following</p>
+            </div>
+          </Link>
 
         </div>
       </main>

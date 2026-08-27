@@ -10,7 +10,7 @@ function Home() {
     const fetchPosts = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/posts"
+          "https://mini-social-media-4xtk.vercel.app/api/posts"
         );
 
         const data = await response.json();
@@ -34,7 +34,7 @@ function Home() {
       );
 
       const response = await fetch(
-        "http://localhost:5000/api/posts",
+        "https://mini-social-media-4xtk.vercel.app/api/posts",
         {
           method: "POST",
           headers: {
@@ -59,7 +59,7 @@ function Home() {
   const handleLike = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/posts/${id}/like`,
+        `https://mini-social-media-4xtk.vercel.app/api/posts/${id}/like`,
         {
           method: "PUT",
         }
@@ -88,7 +88,7 @@ function Home() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/posts/${id}/comment`,
+        `https://mini-social-media-4xtk.vercel.app/api/posts/${id}/comment`,
         {
           method: "PUT",
           headers: {
@@ -122,7 +122,7 @@ function Home() {
   const handleDelete = async (id) => {
     try {
       await fetch(
-        `http://localhost:5000/api/posts/${id}`,
+        `https://mini-social-media-4xtk.vercel.app/api/posts/${id}`,
         {
           method: "DELETE",
         }
@@ -141,7 +141,7 @@ function Home() {
   const handleDeleteComment = async (postId, comment) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/posts/${postId}/comment/delete`,
+        `https://mini-social-media-4xtk.vercel.app/api/posts/${postId}/comment/delete`,
         {
           method: "PUT",
           headers: {
@@ -175,7 +175,9 @@ function Home() {
 
         <div className="home-header">
           <h1>Welcome to Mini Social Media 👋</h1>
-          <p>Connect, share and interact with your friends.</p>
+          <p>
+            Connect, share and interact with your friends.
+          </p>
           <strong>Total Posts: {posts.length}</strong>
         </div>
 
@@ -200,13 +202,19 @@ function Home() {
           {posts.length === 0 ? (
             <div className="empty-posts">
               <h3>No posts yet 😌</h3>
-              <p>Be the first person to create a post!</p>
+              <p>
+                Be the first person to create a post!
+              </p>
             </div>
           ) : (
             posts.map((post) => (
-              <div className="post" key={post._id}>
+              <div
+                className="post"
+                key={post._id}
+              >
 
                 <div className="post-user">
+
                   <div className="user-avatar">
                     👤
                   </div>
@@ -224,6 +232,7 @@ function Home() {
                       </small>
                     )}
                   </div>
+
                 </div>
 
                 <p className="post-content">
@@ -282,6 +291,7 @@ function Home() {
                           className="comment"
                           key={index}
                         >
+
                           <span>
                             💬 {comment}
                           </span>
@@ -296,6 +306,7 @@ function Home() {
                           >
                             🗑️
                           </button>
+
                         </div>
                       )
                     )}

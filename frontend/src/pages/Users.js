@@ -16,7 +16,7 @@ function Users() {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/users"
+        "https://mini-social-media-4xtk.vercel.app/api/users"
       );
 
       const data = await response.json();
@@ -35,8 +35,8 @@ function Users() {
       }
 
       const url = isFollowing
-        ? `http://localhost:5000/api/users/${userId}/unfollow`
-        : `http://localhost:5000/api/users/${userId}/follow`;
+        ? `https://mini-social-media-4xtk.vercel.app/api/users/${userId}/unfollow`
+        : `https://mini-social-media-4xtk.vercel.app/api/users/${userId}/follow`;
 
       const response = await fetch(url, {
         method: "PUT",

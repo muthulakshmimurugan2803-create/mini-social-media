@@ -17,7 +17,7 @@ function Followers() {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${userId}/followers`
+          `https://mini-social-media-4xtk.vercel.app/api/users/${userId}/followers`
         );
 
         const data = await response.json();
